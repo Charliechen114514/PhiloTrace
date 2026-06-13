@@ -1,0 +1,16 @@
+{
+  "name": "philotrace",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "PhiloTrace 哲思留痕 — 开放式哲学学习与对话笔记站",
+  "scripts": {
+    "dev": "vitepress dev site",
+    "build": "vitepress build site",
+    "preview": "vitepress preview site"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.34"
+  }
+}

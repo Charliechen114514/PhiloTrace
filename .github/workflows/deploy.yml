@@ -1,0 +1,67 @@
+name: Deploy
+
+# 推到 main 即自动构建并部署到 GitHub Pages。
+# 首次使用前：仓库 Settings → Pages → Build and deployment → Source 选 "GitHub Actions"。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署，避免产物覆盖；排队中的不取消，保证最新一次一定部署。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # lastUpdated 需要完整 git 历史
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build
+        run: pnpm build
+        env:
+          # 项目站地址是 https://<user>.github.io/<repo>/，base 必须是 /<repo>/。
+          # 这里从仓库名自动推导；若是用户/组织页（<user>.github.io 仓），改成 BASE_PATH: '/'。
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
