@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { withBase } from 'vitepress'
 import { data as posts } from '../../data/posts.data'
 
 const recent = posts.slice(0, 6)
@@ -24,7 +25,7 @@ function fmt(date: unknown): string {
     <h2>最近更新</h2>
     <ul>
       <li v-for="p in recent" :key="p.url">
-        <a :href="p.url">{{ p.frontmatter.title }}</a>
+        <a :href="withBase(p.url)">{{ p.frontmatter.title }}</a>
         <span class="recent-meta">
           <em class="recent-type">{{ typeLabel[p.frontmatter.type as string] || '笔记' }}</em>
           <time>{{ fmt(p.frontmatter.date) }}</time>
